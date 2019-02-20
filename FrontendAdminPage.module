@@ -63,13 +63,30 @@ class FrontendAdminPage extends WireData implements Module {
 			// Pretend that this page is being loaded inside a modal
 			// So that the admin header and footer are not rendered
 			$this->wire('input')->get->modal = 1;
-
+			$this->addHookAfter("Page::render", $this, "modifyHtml");
 		}
 		// But if not a frontend admin page and the user is the frontend-only user...
 		elseif($user->hasRole('frontend-only')) {
 			// ...then log them out
 			$session->logout();
 		}
+	}
+
+	/**
+	 * Modify html markup after page render.
+	 *
+	 * @param HookEvent $e
+	 * @return void
+	 */
+	public function ___modifyHtml(HookEvent $e) {
+		$html = $e->return;
+
+		// remove admin url from ProcessWire.config JS object
+		$url = $this->pages->get(2)->url;
+		$html = str_replace("\"admin\": \"$url\",", "\"admin\": \"null\",", $html);
+		
+		// return markup
+		$e->return = $html;
 	}
 
 }
