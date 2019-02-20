@@ -20,7 +20,7 @@ When this page is viewed by a guest they are silently logged as the "frontend-on
 
 The header and footer of the admin theme are not rendered when the page is viewed. 
 
-When a user logged into the "frontend-only" account accesses any other page they are logged out. This is for the sake of logged-out users of other roles, so that when they go to log into the PW admin they don't find themselves already logged in as the "frontend-only" user.
+When a user logged into the "frontend-only" account views any other page they are logged out. This is for the sake of logged-out users of other roles, so that when they go to log into the PW admin they don't find themselves already logged in as the "frontend-only" user.
 
 ## Taking the concept further
 
