@@ -61,10 +61,14 @@ class ProcessFrontendAdminPage extends Process {
 		$session = $this->wire('session');
 		$valid_colours = array('Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Indigo', 'Violet');
 
+		// add iframe resizer script
+		$this->config->scripts->add('https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/3.6.5/iframeResizer.contentWindow.min.js');
+
 		// Handle submitted data
-		$selected_colours = [];
+		$selected_colours = $session->getFor($this, 'selected_colours') ?: [];
 		if($input->post->do_something) {
 			$selected_colours = $this->wire('sanitizer')->options($input->post->colours ?: array(), $valid_colours);
+			$session->setFor($this, 'selected_colours', $selected_colours);
 		}
 
 		/* @var InputfieldForm $form */
@@ -78,7 +82,6 @@ class ProcessFrontendAdminPage extends Process {
 			$f->label = 'Your selection';
 			$f->value = 'You selected the following colours: ' . implode(', ', $selected_colours);
 			$form->add($f);
-			$session->removeFor($this, 'selected_colours');
 		}
 
 		/* @var InputfieldAsmSelect $f */
