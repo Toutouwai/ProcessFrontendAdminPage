@@ -12,6 +12,8 @@ Create a new role named "frontend-only". Give this role the "process-frontend-ad
 
 Create a new user named "frontend-only" and give them the "frontend-only" role.
 
+View the "Demo frontend admin page" on the frontend while not logged into the PW admin.
+
 ## How the module works
 
 On install the module creates a "Demo frontend admin page" under Home. This page uses the admin template with the ProcessFrontendAdminPage process assigned.
