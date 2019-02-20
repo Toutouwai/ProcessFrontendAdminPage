@@ -1,0 +1,75 @@
+<?php namespace ProcessWire;
+
+/**
+ *
+ * Frontend Admin Page
+ *
+ * @author Robin Sallis
+ *
+ * ProcessWire 3.x
+ * Copyright (C) 2011 by Ryan Cramer
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ *
+ * http://www.processwire.com
+ * http://www.ryancramer.com
+ *
+ */
+
+class FrontendAdminPage extends WireData implements Module {
+
+	/**
+	 * Module information
+	 */
+	public static function getModuleInfo() {
+		return array(
+			'title' => 'Frontend Admin Page',
+			'summary' => 'Hooks needed for the ProcessFrontendAdminPage module.',
+			'version' => '0.1.0',
+			'author' => 'Robin Sallis',
+			'href' => 'https://github.com/Toutouwai/ProcessFrontendAdminPage',
+			'icon' => 'file-code-o',
+			'autoload' => true,
+			'requires' => 'ProcessFrontendAdminPage, ProcessWire>=3.0.0',
+		);
+	}
+
+	/**
+	 * Init
+	 */
+	public function init() {
+		$this->addHookBefore('ProcessPageView::execute', $this, 'beforePageView');
+	}
+
+	/**
+	 * Before a page is viewed
+	 *
+	 * @param HookEvent $event
+	 */
+	protected function beforePageView(HookEvent $event) {
+
+		$ppv = $event->object;
+		$user = $this->wire('user');
+		$session = $this->wire('session');
+		$page = $ppv->_callMethod('getPage', array());
+
+		// If this is a frontend admin page...
+		if($page && $page->process == 'ProcessFrontendAdminPage') {
+			// ...and the user is guest...
+			if($user->isGuest()) {
+				// ...then log them in as the frontend-only user
+				$session->forceLogin('frontend-only');
+			}
+
+			// Pretend that this page is being loaded inside a modal
+			// So that the admin header and footer are not rendered
+			$this->wire('input')->get->modal = 1;
+
+		}
+		// But if not a frontend admin page and the user is the frontend-only user...
+		elseif($user->hasRole('frontend-only')) {
+			// ...then log them out
+			$session->logout();
+		}
+	}
+
+}

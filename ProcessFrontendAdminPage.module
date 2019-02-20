@@ -1,0 +1,98 @@
+<?php namespace ProcessWire;
+
+/**
+ *
+ * Process Frontend Admin Page
+ *
+ * @author Robin Sallis
+ *
+ * ProcessWire 3.x
+ * Copyright (C) 2011 by Ryan Cramer
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ *
+ * http://www.processwire.com
+ * http://www.ryancramer.com
+ *
+ */
+
+class ProcessFrontendAdminPage extends Process {
+
+	/**
+	 * Module information
+	 */
+	public static function getModuleinfo() {
+		return array(
+			'title' => 'Process Frontend Admin Page',
+			'summary' => 'Demo of how a Process module could execute on the frontend.',
+			'version' => '0.1.0',
+			'author' => 'Robin Sallis',
+			'href' => 'https://github.com/Toutouwai/ProcessFrontendAdminPage',
+			'icon' => 'file-code-o',
+			'permission' => 'process-frontend-admin-page',
+			'permissions' => array(
+				'process-frontend-admin-page' => 'Access Process Frontend Admin Page'
+			),
+			'page' => array(
+				'name' => 'demo-frontend-admin-page',
+				'title' => 'Demo frontend admin page',
+				'parent' => 1,
+			),
+			'installs' => 'FrontendAdminPage',
+			'requires' => 'ProcessWire>=3.0.0',
+		);
+	}
+
+
+	/**
+	 * Execute
+	 */
+	public function ___execute() {
+
+		$input = $this->wire('input');
+		$modules = $this->wire('modules');
+		$session = $this->wire('session');
+		$valid_colours = array('Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Indigo', 'Violet');
+
+		// Handle submitted data
+		if($input->post->do_something) {
+			$selected_colours = $this->wire('sanitizer')->options($input->post->colours ?: array(), $valid_colours);
+			// Store the selection
+			$session->setFor($this, 'selected_colours', $selected_colours);
+			// Redirect
+			$session->redirect($this->wire('page')->httpUrl);
+		}
+
+		/* @var InputfieldForm $form */
+		$form = $modules->InputfieldForm;
+
+		// If any colours were previously selected...
+		$selected_colours = $session->getFor($this, 'selected_colours');
+		if(!empty($selected_colours)) {
+			/* @var InputfieldMarkup $f */
+			$f = $modules->InputfieldMarkup;
+			$f->name = 'selected_colours';
+			$f->label = 'Your selection';
+			$f->value = 'You selected the following colours: ' . implode(', ', $selected_colours);
+			$form->add($f);
+			$session->removeFor($this, 'selected_colours');
+		}
+
+		/* @var InputfieldAsmSelect $f */
+		$f = $modules->InputfieldAsmSelect;
+		$f->name = 'colours';
+		$f->label = 'Select some colours';
+		$f->addOptions($valid_colours, false);
+		$form->add($f);
+
+		/* @var InputfieldSubmit $s */
+		$s = $modules->InputfieldSubmit;
+		$s->name = 'do_something';
+		$s->value = 'Do something';
+		$s->icon = 'bolt';
+		$form->add($s);
+
+		return $form->render();
+
+	}
+
+}
