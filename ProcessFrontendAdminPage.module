@@ -24,7 +24,7 @@ class ProcessFrontendAdminPage extends Process {
 		return array(
 			'title' => 'Process Frontend Admin Page',
 			'summary' => 'Demo of how a Process module could execute on the frontend.',
-			'version' => '0.1.0',
+			'version' => '0.1.1',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/ProcessFrontendAdminPage',
 			'icon' => 'file-code-o',
@@ -42,9 +42,26 @@ class ProcessFrontendAdminPage extends Process {
 		);
 	}
 
+	public function __construct() {
+		parent::__construct();
+
+		// Reset modal parameter
+		$this->wire('input')->get->modal = 0;
+
+		// Define any allowed URL segments
+		$allowed_segments = array();
+		// Show 404 for any invalid URL segments
+		// This approach is not ideal I but can't see a better way
+		$segment = $this->wire('input')->urlSegment1;
+		if($segment && !in_array($segment, $allowed_segments)) {
+			$redirect_url = $this->wire('pages')->get($this->wire('config')->http404PageID)->httpUrl;
+			$this->wire('session')->redirect($redirect_url);
+		}
+
+	}
 
 	/**
-	 * Execute
+	 * Execute - replace the contents of this method with whatever you need
 	 */
 	public function ___execute() {
 
@@ -74,7 +91,6 @@ class ProcessFrontendAdminPage extends Process {
 			$f->label = 'Your selection';
 			$f->value = 'You selected the following colours: ' . implode(', ', $selected_colours);
 			$form->add($f);
-			$session->removeFor($this, 'selected_colours');
 		}
 
 		/* @var InputfieldAsmSelect $f */
@@ -82,6 +98,7 @@ class ProcessFrontendAdminPage extends Process {
 		$f->name = 'colours';
 		$f->label = 'Select some colours';
 		$f->addOptions($valid_colours, false);
+		$f->value = $selected_colours;
 		$form->add($f);
 
 		/* @var InputfieldSubmit $s */
