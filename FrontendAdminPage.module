@@ -24,7 +24,7 @@ class FrontendAdminPage extends WireData implements Module {
 		return array(
 			'title' => 'Frontend Admin Page',
 			'summary' => 'Hooks needed for the ProcessFrontendAdminPage module.',
-			'version' => '0.1.0',
+			'version' => '0.1.1',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/ProcessFrontendAdminPage',
 			'icon' => 'file-code-o',
@@ -63,30 +63,37 @@ class FrontendAdminPage extends WireData implements Module {
 			// Pretend that this page is being loaded inside a modal
 			// So that the admin header and footer are not rendered
 			$this->wire('input')->get->modal = 1;
-			$this->addHookAfter("Page::render", $this, "modifyHtml");
+
+			// Add PageRender hook
+			$this->addHookAfter('Page::render', $this, 'modifyHtml');
+
 		}
 		// But if not a frontend admin page and the user is the frontend-only user...
 		elseif($user->hasRole('frontend-only')) {
-			// ...then log them out
+			// ...then log them out while keeping their session data
+			$session_data = $session->getAll();
+			unset($session_data['_user']);
 			$session->logout();
+			foreach($session_data as $key => $value) {
+				$session->set($key, $value);
+			}
 		}
 	}
 
 	/**
 	 * Modify html markup after page render.
 	 *
-	 * @param HookEvent $e
+	 * @param HookEvent $event
 	 * @return void
 	 */
-	public function ___modifyHtml(HookEvent $e) {
-		$html = $e->return;
+	public function ___modifyHtml(HookEvent $event) {
+		$html = $event->return;
 
-		// remove admin url from ProcessWire.config JS object
-		$url = $this->pages->get(2)->url;
-		$html = str_replace("\"admin\": \"$url\",", "\"admin\": \"null\",", $html);
-		
-		// return markup
-		$e->return = $html;
+		// Remove admin url from ProcessWire.config JS object
+		$url = $this->wire('config')->urls->admin;
+		$html = str_replace('"admin": "' . $url . '"', '"admin": ""', $html);
+
+		$event->return = $html;
 	}
 
 }
