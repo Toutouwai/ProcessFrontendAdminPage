@@ -48,14 +48,17 @@ class ProcessFrontendAdminPage extends Process {
 		// Reset modal parameter
 		$this->wire('input')->get->modal = 0;
 
-		// Define any allowed URL segments
-		$allowed_segments = array();
-		// Show 404 for any invalid URL segments
-		// This approach is not ideal I but can't see a better way
-		$segment = $this->wire('input')->urlSegment1;
-		if($segment && !in_array($segment, $allowed_segments)) {
-			$redirect_url = $this->wire('pages')->get($this->wire('config')->http404PageID)->httpUrl;
-			$this->wire('session')->redirect($redirect_url);
+		// If this page is executing this process
+		if($this->wire('page')->process == $this) {
+			// Define any allowed URL segments
+			$allowed_segments = array();
+			// Show 404 for any invalid URL segments
+			// This approach is not ideal I but can't see a better way
+			$segment = $this->wire('input')->urlSegment1;
+			if($segment && !in_array($segment, $allowed_segments)) {
+				$redirect_url = $this->wire('pages')->get($this->wire('config')->http404PageID)->httpUrl;
+				$this->wire('session')->redirect($redirect_url);
+			}
 		}
 
 	}
